@@ -13,7 +13,7 @@ from torch import nn
 from torch.nn import functional as F
 
 from .states import capture_init
-from .utils import center_trim, unfold
+from .utils import CustomGLU, center_trim, unfold
 from .transformer import LayerScale
 
 
@@ -138,7 +138,7 @@ class DConv(nn.Module):
                 nn.Conv1d(channels, hidden, kernel, dilation=dilation, padding=padding),
                 norm_fn(hidden), act(),
                 nn.Conv1d(hidden, 2 * channels, 1),
-                norm_fn(2 * channels), nn.GLU(1),
+                norm_fn(2 * channels), CustomGLU(1),
                 LayerScale(channels, init),
             ]
             if attn:
@@ -310,7 +310,7 @@ class Demucs(nn.Module):
         self.skip_scales = nn.ModuleList()
 
         if glu:
-            activation = nn.GLU(dim=1)
+            activation = CustomGLU(dim=1)
             ch_scale = 2
         else:
             activation = nn.ReLU()

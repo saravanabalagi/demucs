@@ -147,3 +147,18 @@ class DummyPoolExecutor:
 
     def __exit__(self, exc_type, exc_value, exc_tb):
         return
+
+
+class CustomGLU(torch.nn.Module):
+    def __init__(self, dim: int):
+        super().__init__()
+        self.dim = dim
+
+    def forward(self, x):
+        assert x.size(self.dim) % 2 == 0, f"GLU expects even len in dimension {self.dim}"
+        x1, x2 = x.chunk(2, dim=self.dim)
+        return x1 * torch.sigmoid(x2)
+    
+
+def fn_custom_glu(x, dim):
+    return CustomGLU(dim)(x)

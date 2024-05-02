@@ -15,6 +15,8 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
+from demucs.utils import fn_custom_glu
+
 from .demucs import DConv, rescale_module
 from .states import capture_init
 from .spec import spectro, ispectro
@@ -151,7 +153,7 @@ class HEncLayer(nn.Module):
                 y = y.view(B, Fr, C, T).permute(0, 2, 1, 3)
         if self.rewrite:
             z = self.norm2(self.rewrite(y))
-            z = F.glu(z, dim=1)
+            z = fn_custom_glu(z, dim=1)
         else:
             z = y
         return z
@@ -310,7 +312,7 @@ class HDecLayer(nn.Module):
             x = x + skip
 
             if self.rewrite:
-                y = F.glu(self.norm1(self.rewrite(x)), dim=1)
+                y = fn_custom_glu(self.norm1(self.rewrite(x)), dim=1)
             else:
                 y = x
             if self.dconv:
